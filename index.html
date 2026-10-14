@@ -50,6 +50,16 @@
         </div>
     </header>
 
+    <div class="w-full max-w-4xl mb-5 bg-white/90 rounded-2xl border-2 border-amber-200 shadow-md p-3">
+        <div class="flex items-center justify-between gap-3 mb-2">
+            <span class="font-extrabold text-indigo-700">🎯 集滿 5 題答對，就有驚喜！</span>
+            <span id="correct-progress-label" class="text-sm font-bold text-amber-700">0 / 5 題</span>
+        </div>
+        <div class="h-3 bg-amber-100 rounded-full overflow-hidden" role="progressbar" aria-label="距離下一次獎勵的進度" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0" id="correct-progress-bar">
+            <div id="correct-progress-fill" class="h-full rounded-full bg-gradient-to-r from-amber-400 to-pink-400 transition-all duration-500" style="width:0%"></div>
+        </div>
+    </div>
+
     <nav class="w-full max-w-4xl flex justify-center space-x-2 md:space-x-4 mb-6">
         <button onclick="switchTab('learn')" id="tab-learn" class="tab-btn px-5 py-3 rounded-2xl font-bold text-base md:text-lg transition-all duration-300 bg-indigo-600 text-white shadow-lg shadow-indigo-300 transform -translate-y-1">
             📚 單字學習卡
@@ -138,8 +148,16 @@
 
                 <div id="spelling-card" class="bg-indigo-50 border-2 border-indigo-200 rounded-2xl p-6 md:p-8 max-w-md mx-auto mb-5 shadow-inner">
                     <div id="spelling-emoji" class="mb-3"></div>
-                    <div id="spelling-zh" class="text-3xl font-black text-slate-800 mb-2">頭</div>
-                    <div id="spelling-hint" class="text-sm font-bold text-indigo-500 mb-4">請依順序選擇字母</div>
+                    <div class="flex items-center justify-center gap-3 mb-2">
+                        <div id="spelling-zh" class="text-3xl font-black text-slate-800">頭</div>
+                        <button type="button" onclick="playSpellingWord()" aria-label="播放英文發音" title="聽英文發音" class="w-12 h-12 rounded-full bg-sky-500 hover:bg-sky-600 text-white text-2xl shadow-lg active:scale-95 transition" style="touch-action: manipulation">🔊</button>
+                    </div>
+                    <div id="spelling-hint" class="text-sm font-bold text-indigo-500 mb-2">請依序選擇字母</div>
+                    <div id="spelling-pattern" class="text-2xl font-black tracking-widest text-violet-600 mb-3" aria-live="polite"></div>
+                    <div class="flex justify-center gap-2 mb-4">
+                        <button type="button" id="spelling-mode-full" onclick="setSpellingMode('full')" class="px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold shadow">完整拼寫</button>
+                        <button type="button" id="spelling-mode-fill" onclick="setSpellingMode('fill')" class="px-4 py-2 rounded-xl bg-white text-indigo-700 border-2 border-indigo-200 font-bold">填空練習</button>
+                    </div>
                     <div id="spelling-answer-slots" class="flex flex-wrap items-center justify-center gap-2 min-h-[58px]" aria-label="已選字母；點字母可退回"></div>
                     <p class="text-xs text-slate-500 mt-3">選錯了？點上方已選的字母就能退回。</p>
                 </div>
@@ -167,6 +185,25 @@
         ✨ 專為國小一年級小朋友設計的英文聽說讀寫互動學習網 ✨
     </footer>
 
+    <div id="reward-overlay" class="hidden fixed inset-0 z-50 bg-indigo-950/60 backdrop-blur-sm items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="reward-title">
+        <div id="reward-card" class="relative w-full max-w-sm rounded-[2rem] border-4 border-yellow-300 bg-white p-7 text-center shadow-2xl">
+            <div class="text-6xl mb-3 reward-star">🌟🎉🌟</div>
+            <h2 id="reward-title" class="text-3xl font-black text-indigo-600 mb-2">太棒了！</h2>
+            <p id="reward-message" class="text-lg font-bold text-slate-700 mb-5">你已經答對 5 題！</p>
+            <div class="text-5xl mb-5">🏆</div>
+            <button type="button" onclick="closeReward()" class="w-full rounded-2xl bg-gradient-to-r from-pink-500 to-orange-400 px-6 py-3 text-xl font-extrabold text-white shadow-lg">繼續冒險！</button>
+            <button type="button" onclick="closeReward()" aria-label="關閉獎勵視窗" class="absolute right-3 top-2 rounded-full px-3 py-1 text-xl text-slate-400">×</button>
+        </div>
+    </div>
+
+    <style>
+        @keyframes rewardPop { 0% { transform: scale(.45) rotate(-8deg); opacity: 0; } 65% { transform: scale(1.08) rotate(3deg); opacity: 1; } 100% { transform: scale(1) rotate(0); opacity: 1; } }
+        @keyframes rewardFloat { 0%,100% { transform: translateY(0) rotate(-5deg); } 50% { transform: translateY(-12px) rotate(5deg); } }
+        #reward-card { animation: rewardPop .55s ease-out both; }
+        .reward-star { animation: rewardFloat 1.2s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) { #reward-card, .reward-star { animation: none !important; } }
+    </style>
+
     <script>
         const cartoonImages = {
             head: "data:image/webp;base64,UklGRhASAABXRUJQVlA4IAQSAABwTACdASq6ALEAPkkgjkSioiEUqb2QKASEsYODUcQEJfXqh+y8+q2v53+08dhZnntDhfqj2Dv116eHmO/bj1kvSt/e/Rj6nX0Gul5/d30lbo54p/jv17+R/MbbrvQ/+WffX8//eONP5cahH4//Lv8z/X+F/AF+i/2L/mf4Dk0+cDzp+RBoDfor1YP7z/4f6T0f/Tn7O/Aj/MP7X/zuyca5kh7///oxfUdFxZ9eZmk+oRnXUmPl2YcwVkeiGNMDeoPUZnMwOV80ElCyMZP+0MwT4skzC9sUWMjnEjLHzISQWj0jyqnIVI/lkJYN9Lvj7FKej4GbQbpvK5u8hb47E8LUgukFOxuoss+GvOVswuFIwIx4SnLMQCYUBHnYZuzu4DiGypPP7IA9lS5MyZHRPfDaX4hvJEkAAYSfw+p8QAh5TpdVubYDoCvPlhMyiQz9XvLbbOGL5IxgBRNmsgvdW7ol7SLRlq327i9GE+L39L6cWM8hoGS4a1VIx6I2Xs1tTMikqNHGabYICFSK67BjY0pTNcOMVuAbGjC82mTvJleUXOC2MUyPfl1BvfBu9nJoZ5UW20jXp+mHZrqST2DcndMfkOJn4lM1tdeYJiEDeXttLaBEwlKyKJ0u8lzTC/MK/3MmJWITE3QIEqDz/nGvA1E0Qwa/V8znCLljBY3BJQ/hwIsQDKIRBhlB3fCnVI4jmvgqpakRyijXtxcJzdDYqdGf5wQ6voAwMGr/27o0xLyIenKYyFVUHc1SPHgr6UwR9ZbW+VCVmta199BaJ+1b70IQnW57o5ZOBy3UOy+fnNOwGFr1qB2dessD1b3fgAD+/aoK++jJCLf5eZGJLZxeqS1xvQTwBGf93IojRL9lEIdZ6ph2UGkUA9CAvTSn7QUkZ3jHFzbBI5Z7lgJglGCzs4ijjK4P54nEerSBJOvu1gGaapLm4ZOBG3oX825I8sCfdPzirnvaTt3TTPf0AdyAKxY7V9jQaNsw94hpwi+3epnjNY0sIbHHMZD0ZouLYHEQf7ss4fcC3dKJz83thadRfyuC8cA6ur/o92PLsk8BSau/fCc/pRosWP+7GtD7M2a1fUK8H1T70nWgttV1OUHo1eg+fRdd+bR95svmYzArULfVPUJQCdTv9MPjyesMZcbVFLf1rFf+Jvm8G43VFh8lQivicOD/NQqOcqJ0UWm4/DaTrIexRx9XIZB07wgBrtGR348LJwBOp6vAcgXVYu7XKf6iZycuElj5u9z96eX4ihDiaN0rWWy39zawU9y9fl8KnrXAhvHAZWMYMll1/kx9HC+tbvOG4rIv7JC/ujgz4Xve2dBqUZvL3u8DUYWPhD/Ol3oHINjXf5PhFJ7QNXJtfvq7FTjCssgr6m6oLn1L/8UPF36UwwiNRRxHMmhLjTrKql4gv0f0v1c2+MX4H1t6LKXXzC9Ii/APdVHU3qSiZCsHB/apgslxZ4EtSJU+FOdqA7bnB7Hf1EWee3ZHTWghwIP7ml88Ofg5Vz/Xn1nflj6EftWYFbAxkGx0Nrt4r8GqJZnM22BQdIC6P0Q2wG+2TxI8rJQE3okS6jUmWT9L1u/JnsvJVnib4pldJWDdFrcb0mB2cFgH7C6uX+w7mLVaYjn54I6gSoYVaefuuBJCEAFRHylDYkD/3irVxKheI2A1FZcc5PnhQL2Bq0s2XUMNnm/lTmxAiJk9ZAmmc3gRWj5d556dLGhsIRv2i9Hf2A5xZcmjtZq0hWOwyzOrVsz49WCiLPj5PUxy0m5An/fMmR/mCYNnNp97UFjWvd0GNHJspPmU04VupnX2rvl9hu/O+iClD8vNbt6KmmAhmKzxr7Ij/DAA6wPNNh1nxbQjRGmhiZzhe92uGjmG1pei3ucYvcym75bT6E08JNcRw9eO5L+m4MowzeY1eouCRsTBAJ6++jm3veacrMxMqCqydOasECOi7duoq5c55LkgNNBVgLZjUXCYEjN8Uc3DSsMHyEH8PoiTDsJpK8FZdtsIK1dsXNJT0bKI2ooNOREM5b1YC70OnhqKt904yj9gbWrKc/EaNTBaA5xqP/Qoy6cK2DQL//IiJBzyWvbmjTsVvuLIa5KB4vs5gofhKL5ZesFDrA04Aem1UyIL3yWjpBTS/CjhyOG23Of9wb/B8mEOnAWjl+Zz9PvwmkyrhyoMjKWbIi41N1JOqyVbi2h/QzjJmgFBzUhTXQzx8n+C8gUV43C5w1xWfRCZhyVCCnte4aeLHEfWcZ4i2YeHnaLJzHpv9ddoUOo8h6babSg9hOmwZDd8qtXIFkV1PtcI7g3oSZ+Z2zol69rInoPDrJY35m4uN7sQs7HsmmdBLwArcl0JF0VUSEbI446owjVLDaHmggPvwZO6onVdMZSUiax74jLL21YHM8CXHwpgOTeSbJHVSW4zbh2CVCKyBZw/6IwKKJN1NE0K9rRBfQTJkzbUIlXRYUMLsdzoNtIXwB9PzuYd0e3My6mulWGhK6HdUhmemBRUhtb/iz7ELI6PVXlwHjeRPqOcL/BeIIyHDZoLIX/Qw7semll8o4HI9usQjn+3YLtxemleefHYTJxbjqamUflyw1D03s3VdhplvVQH0RyXfKQD5I38RvVUegFl2I7s1e5dqI/2C8B9udW13FTJHjTi4mhI+C4ef8JA7uQsRitZKJ5R0mJXV+nKPgLSJqtN6DLTn4Od1WbAoHu/c9uiDz2Jhn8W89pjoYNm/xIntQXRo1se2U9Kh/9Rglf5gQqUjF0Gs3HNPRjEH2Ki4nmC1XjO35QQ+/jkbVE1QEJUYnIMokAbtAz7xlZq2+QI/tUYO3lRLFbLBZGbEtA5sUMi+7ETex42k7oUuy8LFqMFhzggM7zLwelJhBrw59h4MRYApOSt/Zpuvh++Xf/LKrdEd5+yxxYZqKvc4C/iGeOaUSPDf5Q2BMi68eMV37B1ksj1RdIMNEdj6sjxnX/Wc7ZdTodp61HH4KGgInsjSEz2dHWpRDGuyi4DkQ2nresKMkcKNo5c3YEQB/8QfQ/egCWOeml+HXIEVHkexjolMyYWobcv6AZ5z4zV0K9xBj1cO3Lu4udHzDxiBD/Hf3c0Ww1EZ91pJbRAnFRLmBF6AUeGKQUa29IhLZU9/8TSROLXWqw6kJ3+TgxxG0mM672JSgrq2oMd98UoAk6H7ijKEbD8FrTmwG0UUAXbD/dl2h76EiIKQuCi7hH3GMB6yg37oZuBE7w4V3bp7FTW164RN0cPZjZ0NVbmbsGjNjQxQnxNHk+meMw79FNcXPuALgzvj3Q9k5daaJghpwM8d5elM5ul6DRLkKlQ4tIb/ZXLpAbM6fYiOGNP8JNyeXBB2qjm5b9fnp8biHFjO/0P9JQyH/OyVT74L0PiQXPKXh8g5BVRbp+U4txD6CjllHvQGk92V3iXpmjbg61xuzEma3nSDYXLU+4CODqvl2RYyfaDCF99Jts0nDQOmZdXzN5DEms1xJQYCMXMzBKoU3EeJnvN8HkikN7o8sVj/N5e9Oe2JYozU+g1tr7pi5IMOsuqBjLfWzY5plTIC3AfDq7//3XoDRvwJ+41ZLEG8/Zc8kLOIkNz0yFtYDPG0Ktc1Vpz5U/cedXmaR01ccf5o3Nlie+RaTlb9BuP2thq+x4x/GSD9kAxqwmEPBOpPmczecAakQMSIkJxglXGq+ZV1/AiVBbDMM+3fSHxbWVYA25D2OYjX9kxVS6kKhyCbAVGxnH0jiiEjQHl9BUu9KU9bPZSmEO5kY5uPV5iimtzHGg2sjkwEfit1WeYqXTlrjjz1kFYS845cl2I6QkqHsh0c3tMa9MpMmwk0lkXr614Zno9RgIMW+9QsLLwMb9dHetLynFMVcqRJNPLL6FrQwAUG0/4OB1ckvn+3MNwk0BisGm9nEhmvabEbu306qsgwHCVg53SO+GGlYibEzug9i8ReNzx6/j2Ce7zdDykdBoHb4vbgRijx+QPmVzTVbPHp9MvxYF/b55eFkqkC9pfku2LQgSPy31PoxDTVjvIk6p63WiFy2xHHmx/hdR8GbSk3T+3ZN38+tBS6PI9O3TPfBdlo9sasEjPWUld1taJvPQHo09LP+DEj050RUokvE4axP3e/vQPM626qlAvF6AxY6yuo2/DUTBwcnHSK501p5F/2AOI+HcvGt67hx0j03MsOFgvkhio57tAKMhVQ97FSvgpXloqO8Mm3EbK1WkrYFoc4/DZWJpPtTEUV2P+rkMN4SlN5Yy0YZPTxLkCjJxriHP6HJfAXv4+GmwtlWbjnijXpvv9K14idqGGksZ2HNfVAavO4n/PorEjdHZLTet6aPMIEiXv2tdNt6X7C5rcGimQHvtrhiv2MGBoINdOanjV4EenMX09RDe6CfixiaIVU/9FAnXZwprA5FOztrnEx9pX4xqrkRoPwJOb61Kx3NIAvQOn8/xz8jAm62CIdNSEy3H6EsT6Y9cSjC7XwC/+NLZzLFL3c/AjMBERUbk2BnXslB5TFWb/3+r0tr8tzkDHKK6R/a8fYttLi799UhB/6hDazCA896fvexHhkN7gxOx9RoE58RVW//P3GWhQADbBEMz+ryG6KaLbgE19zgQXio0pMxnjMKL3EdhKPN15S1FYZVkAyml7i71kCi5BpVEjSHIKD8ZEsiV76/BVGnwW2ZInjwflN0SnSsXu/2mg685B9v9//gBCWk7BgLA7+uIOeeoIxQJzC0a/38lNchnAWu13jC/8aATm9p2BcX7uzP+zPHc57rKyquYCc2Ie+z3IWO/H5onBHBnzmO5jWtaXRIEapM7e7hz7SciR/RBaTiKrQptaCM+PsbczFPJeq1sQ+XU7x+Yyi7NX/lx798xbSeVkhW9NtZIZbS9g5JcGzM7xZkZ1BWp5jx+oOodEgxPtt9y7uFvvUEP9KJIo5P78RFZ6hhQx8dVajavLndwDnk8oOF+upJKek24245K6Y8x/BnLDtEP9z6x91eDXkM9JoXrYbeO5Zyu2/2Rm3kec7rvfq372pmAsJSuuerXJONM4VNqdOCfGdcvOdlZQuIz++sYke6SZlGmrRE77cPT8B6f2PR8bypvds9wg6UbfVHxO2ZYV9S2w/99/R+eFKF1d1lPG/69G4Io/nn/9/5d4i29Eb3yILJ/n83a9PiG/5bsA7IvDnAOLnCDpMKDgobiJkEv67W383G6XKDoeG8pF1dl1meEzbFHGcJhH0jQukT4sbPTSdlonCSGgLhwzT07ZSVwSkf6TPBMcSMA8X4D3kr2lMPJeqM8z8mbBOierAkAjbjknD6YIJK04N2Z9vGgbdDVq4lMgLP0vNJ/1ZKU6G/7V+7L7TpFVHstM6k5ItJYwmQ+Q3JQ0oARnOAXa+Nj7sOFwBbDjLwg80cwMWaXMJIfhy37fs6jaUtnc6nhjzp92wu97ulYMXXzuDIKi5aJDJ5aWNW6yRdvmqzTwhxXWnMVnbXJPb/pAl4dPP2YFRGNKcxr/IroJSYlkrIQnHS+F64ip/9lCsPxskmtKCbUhw4ZVQxoSR4OZIPRIev7Yp8WtWZSj1q20NCSeF9tA61AJfS6B9FeGz3VLizGq+ER9EEOdvzPGJSWgpY/PNFJR944JwCbMQ7O5WQpePjKxBMFDXSuQ2eEnwoCS/Eib8cypURP8B/177sv+44Z8Tq+E5//H/OKlmXMOSxxCbOkhLidRgJ4wzRWfYD6i2fIY/4/3/IQU3jTVF8WtOp2CjgfSMrwO/Ev6I4PRGRicDMwjRVKLBNVIq0PHq344pgPRb4y41iaLInT2ns/WOfI0Cc9B1qPVeY7y/HZalDTQfxnTLeL3KgA2T5w9q6gcxApcPkrDhvj4VpNwsAlrwu42zLRx+rLCx31OKc150ZQwKIFH+SfN2tHSVy987TDNQmPNb+9THsqGQ8zUXV0XDISemTE/HsnseQIjJezt00r+tuIHKT7DI0SgVUDoB9w5bj6naXc2urTc9EnHpDkNdGjj0aCRBESDltIfTLdUkyc8SXFJmHjosxTt+LKD6nItswYUMvN57iatnU93KQ4ZrtxaneKDEWdHOJvj9Ef6LOAue/vQ9q32BlVl8CW935h9dUCFQJ5lFfdb6TRgt/gprA1+LBLhLjDpfEj7l+74wSmRw2eWIMcilT/gO5Q66Kfw+FsMyJcuqK4irxLAKkOeAAAA",
@@ -193,17 +230,51 @@
             { en: "nose",  zh: "鼻子",     imageKey: "nose",  hint: "n _ s e" }
         ];
 
-        let score = parseInt(localStorage.getItem('kid_score') || '0');
+        let score = parseInt(localStorage.getItem('kid_score') || '0', 10);
+        // Correct answers persist on this device. Progress cycles from 0 to 5; mistakes never remove progress.
+        let correctCount = parseInt(localStorage.getItem('kid_correct_count') || '0', 10);
         updateScoreDisplay();
+        updateCorrectProgress();
 
         function updateScoreDisplay() {
             document.getElementById('score-display').innerText = `${score} 星星`;
             localStorage.setItem('kid_score', score);
         }
 
+        function updateCorrectProgress() {
+            const progress = correctCount % 5;
+            const label = document.getElementById('correct-progress-label');
+            const fill = document.getElementById('correct-progress-fill');
+            const bar = document.getElementById('correct-progress-bar');
+            if (label) label.textContent = `${progress} / 5 題`;
+            if (fill) fill.style.width = `${progress * 20}%`;
+            if (bar) bar.setAttribute('aria-valuenow', String(progress));
+        }
+
         function addScore(points) {
             score += points;
             updateScoreDisplay();
+            // Every five genuinely completed correct answers triggers a short celebration.
+            correctCount += 1;
+            localStorage.setItem('kid_correct_count', String(correctCount));
+            updateCorrectProgress();
+            if (correctCount % 5 === 0) showReward();
+        }
+
+        function showReward() {
+            const overlay = document.getElementById('reward-overlay');
+            const message = document.getElementById('reward-message');
+            if (message) message.textContent = `你已經答對 ${correctCount} 題！獲得一個魔法獎盃，繼續加油！`;
+            if (overlay) {
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
+            }
+            // No extra sound effect: keep the reward visual and avoid overlapping the word audio.
+        }
+
+        function closeReward() {
+            const overlay = document.getElementById('reward-overlay');
+            if (overlay) { overlay.classList.add('hidden'); overlay.classList.remove('flex'); }
         }
 
         // Web Audio API Synth Sound Effect (Guaranteed Audio Playback)
@@ -507,6 +578,7 @@
 
         // Teacher Quiz Mode
         let currentQuizItem = null;
+        let currentQuizAnswered = false;
 
         function startTeacherQuiz() {
             playChime(true);
@@ -524,6 +596,8 @@
 
             const randomIndex = Math.floor(Math.random() * vocabularyData.length);
             currentQuizItem = vocabularyData[randomIndex];
+            currentQuizAnswered = false;
+            document.getElementById('quiz-spelling-input').disabled = false;
 
             document.getElementById('teacher-prompt-zh').innerText = currentQuizItem.zh;
             speakTeacherQuestion();
@@ -575,6 +649,7 @@
         }
 
         function checkQuizAnswer() {
+            if (currentQuizAnswered) return;
             const userInputValue = document.getElementById('quiz-spelling-input').value.trim().toLowerCase();
             const feedbackEl = document.getElementById('quiz-feedback');
 
@@ -588,6 +663,8 @@
                 playChime(true);
                 feedbackEl.innerHTML = '<span class="text-emerald-600">🎉 太棒了！答對了！發音與拼字都完美！</span>';
                 speakWord('Great job! Correct!', 'en-US');
+                currentQuizAnswered = true;
+                document.getElementById('quiz-spelling-input').disabled = true;
                 addScore(1);
                 document.getElementById('next-quiz-container').classList.remove('hidden');
             } else {
@@ -599,9 +676,42 @@
 
         // Spelling Practice Mode: 10 lowercase letter tiles, including the answer letters plus distractors.
         let currentSpellingItem = null;
+        let currentSpellingAnswered = false;
         let spellingLetterTiles = [];
         let selectedSpellingTileIds = [];
         let nextSpellingTileId = 1;
+        let spellingMode = 'full';
+
+        function setSpellingMode(mode) {
+            spellingMode = mode === 'fill' ? 'fill' : 'full';
+            const fullBtn = document.getElementById('spelling-mode-full');
+            const fillBtn = document.getElementById('spelling-mode-fill');
+            fullBtn.className = spellingMode === 'full' ? 'px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold shadow' : 'px-4 py-2 rounded-xl bg-white text-indigo-700 border-2 border-indigo-200 font-bold';
+            fillBtn.className = spellingMode === 'fill' ? 'px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold shadow' : 'px-4 py-2 rounded-xl bg-white text-indigo-700 border-2 border-indigo-200 font-bold';
+            if (currentSpellingItem) {
+                selectedSpellingTileIds = [];
+                currentSpellingAnswered = false;
+                document.getElementById('spelling-feedback').innerHTML = '';
+                updateSpellingHint();
+                renderSpellingTiles();
+            }
+        }
+
+        function playSpellingWord() {
+            if (currentSpellingItem) speakWord(currentSpellingItem.en, 'en-US');
+        }
+
+        function updateSpellingHint() {
+            if (!currentSpellingItem) return;
+            const word = currentSpellingItem.en.toLowerCase();
+            document.getElementById('spelling-hint').innerText = spellingMode === 'fill'
+                ? '聽發音，再補上缺少的字母！'
+                : `請依序選出 ${word.length} 個小寫字母（共 10 張字母卡）`;
+            const pattern = spellingMode === 'fill'
+                ? word.split('').map((ch, i) => (i === 0 || i === word.length - 1) ? ch : '_').join(' ')
+                : '看圖拼出英文單字';
+            document.getElementById('spelling-pattern').innerText = pattern;
+        }
 
         function shuffleArray(items) {
             const arr = items.slice();
@@ -614,14 +724,16 @@
 
         function loadSpellingQuestion() {
             playChime(true);
+            document.querySelector('#section-spelling button[onclick="loadSpellingQuestion()"]')?.classList.remove('ring-4', 'ring-amber-300');
             document.getElementById('spelling-feedback').innerHTML = '';
             selectedSpellingTileIds = [];
 
             const randomIndex = Math.floor(Math.random() * vocabularyData.length);
             currentSpellingItem = vocabularyData[randomIndex];
+            currentSpellingAnswered = false;
             document.getElementById('spelling-emoji').innerHTML = `<img src="${cartoonImages[currentSpellingItem.imageKey]}" alt="${currentSpellingItem.zh}卡通圖" class="mx-auto w-44 h-36 object-contain rounded-2xl" loading="eager">`;
             document.getElementById('spelling-zh').innerText = currentSpellingItem.zh;
-            document.getElementById('spelling-hint').innerText = `請依序選出 ${currentSpellingItem.en.length} 個小寫字母（共 10 張字母卡）`;
+            updateSpellingHint();
 
             const letters = currentSpellingItem.en.split('').map(letter => ({ id: nextSpellingTileId++, letter }));
             const alphabet = 'abcdefghijklmnopqrstuvwxyz';
@@ -692,6 +804,7 @@
         }
 
         function checkSpelling() {
+            if (currentSpellingAnswered) return;
             const userInput = selectedSpellingTileIds
                 .map(id => spellingLetterTiles.find(tile => tile.id === id)?.letter || '')
                 .join('');
@@ -712,9 +825,11 @@
                 playChime(true);
                 feedbackEl.innerHTML = '<span class="text-emerald-600">🌟 太厲害了！拼字完全正確！獲得 1 顆星星！</span>';
                 speakWord('Awesome!', 'en-US');
+                currentSpellingAnswered = true;
                 addScore(1);
                 document.querySelectorAll('#letter-tile-grid button, #spelling-answer-slots button').forEach(button => button.disabled = true);
-                setTimeout(loadSpellingQuestion, 2000);
+                // Let the child enjoy the success message; tap「換一題」when ready.
+                document.querySelector('#section-spelling button[onclick="loadSpellingQuestion()"]')?.classList.add('ring-4', 'ring-amber-300');
             } else {
                 playChime(false);
                 feedbackEl.innerHTML = `<span class="text-rose-500">💡 再試一次！可以點上方已選的字母退回重選。</span>`;
