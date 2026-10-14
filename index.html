@@ -467,7 +467,7 @@
         const embeddedEnglishAudio = {
             head: 'audio/head.mp3',
             hair: 'audio/hair.mp3',
-            leg: 'audio/leg.mp3'
+            leg: null, // leg.mp3 上傳檔案為空，暫時使用瀏覽器英文語音
             face: 'audio/face.mp3',
             eye: 'audio/eye.mp3',
             ear: 'audio/ear.mp3',
@@ -697,38 +697,8 @@
             }
         }
 
-        async function playSpellingWord() {
-            if (!currentSpellingItem) return;
-            const word = currentSpellingItem.en.toLowerCase();
-            const button = document.querySelector('#spelling-card button[aria-label="播放英文發音"]');
-            if (button) button.textContent = '⏳';
-            try {
-                // Prefer the local MP3 so iPhone Safari does not depend on a remote TTS service.
-                const audioPath = embeddedEnglishAudio[word];
-                if (audioPath) {
-                    stopCurrentSpeech();
-                    const audio = new Audio(audioPath);
-                    audio.preload = 'auto';
-                    audio.volume = 1;
-                    audio.playsInline = true;
-                    audio.setAttribute('playsinline', '');
-                    currentSpeechAudio = audio;
-                    try {
-                        await audio.play();
-                        if (button) button.textContent = '🔊';
-                        return;
-                    } catch (e) {
-                        console.warn('Local word audio failed; using device voice.', e);
-                    }
-                }
-                speakWord(word, 'en-US');
-                if (button) button.textContent = '🔊';
-            } catch (e) {
-                console.warn('Could not play word audio.', e);
-                if (button) button.textContent = '🔊';
-                const feedback = document.getElementById('spelling-feedback');
-                if (feedback) feedback.textContent = '發音播放失敗，請確認手機音量，或再點一次喇叭。';
-            }
+        function playSpellingWord() {
+            if (currentSpellingItem) speakWord(currentSpellingItem.en, 'en-US');
         }
 
         function updateSpellingHint() {
