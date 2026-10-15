@@ -29,6 +29,14 @@
             50% { transform: scale(1.05); }
             100% { transform: scale(1.1); }
         }
+        @keyframes rewardPop {
+            0% { transform: scale(.45) rotate(-8deg); opacity: 0; }
+            70% { transform: scale(1.08) rotate(3deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0); opacity: 1; }
+        }
+        .reward-pop { animation: rewardPop .55s ease-out both; }
+        @keyframes starFloat { 0% { transform: translateY(8px) scale(.6); opacity: 0; } 50% { opacity: 1; } 100% { transform: translateY(-18px) scale(1.15); opacity: 0; } }
+        .floating-star { position:absolute; animation: starFloat 1.2s ease-out forwards; pointer-events:none; }
     </style>
 </head>
 <body class="text-slate-800 flex flex-col items-center justify-between min-h-screen p-4 md:p-6">
@@ -60,10 +68,35 @@
         <button onclick="switchTab('spelling')" id="tab-spelling" class="tab-btn px-5 py-3 rounded-2xl font-bold text-base md:text-lg transition-all duration-300 bg-white text-indigo-600 hover:bg-indigo-50 shadow-md">
             ✍️ 拼字挑戰
         </button>
+        <button onclick="switchTab('fillblank')" id="tab-fillblank" class="tab-btn px-4 py-3 rounded-2xl font-bold text-base md:text-lg transition-all duration-300 bg-white text-indigo-600 hover:bg-indigo-50 shadow-md">
+            🧩 填空挑戰
+        </button>
         <button onclick="switchTab('handwriting')" id="tab-handwriting" class="tab-btn px-4 py-3 rounded-2xl font-bold text-base md:text-lg transition-all duration-300 bg-white text-indigo-600 hover:bg-indigo-50 shadow-md">
             🖍️ 手寫練習
         </button>
     </nav>
+
+    <section id="reward-panel" class="w-full max-w-4xl bg-white/95 rounded-3xl border-4 border-amber-200 shadow-lg p-4 mb-5">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div id="reward-mascot" class="text-5xl transition-all">🧒</div>
+                <div>
+                    <h2 class="text-lg md:text-xl font-black text-indigo-700">🎁 我的英文獎勵屋</h2>
+                    <p id="reward-summary" class="text-sm font-bold text-slate-600">答對 5 題，就能獲得第一顆星星！</p>
+                </div>
+            </div>
+            <div class="flex flex-wrap gap-2 text-center">
+                <div class="bg-yellow-100 border-2 border-yellow-300 rounded-2xl px-3 py-2 min-w-[86px]"><div class="text-xl">⭐</div><div id="reward-star-count" class="font-black text-amber-700">0 顆</div></div>
+                <div id="reward-chest" class="bg-orange-50 border-2 border-orange-200 rounded-2xl px-3 py-2 min-w-[86px]"><div id="reward-chest-icon" class="text-xl">🧰</div><div id="reward-chest-label" class="text-xs font-black text-orange-800">10 題開寶箱</div></div>
+                <div id="reward-decoration" class="bg-purple-50 border-2 border-purple-200 rounded-2xl px-3 py-2 min-w-[86px]"><div id="reward-decoration-icon" class="text-xl">🔒</div><div id="reward-decoration-label" class="text-xs font-black text-purple-800">15 題解鎖皇冠</div></div>
+            </div>
+        </div>
+        <div class="mt-4">
+            <div class="flex justify-between text-xs sm:text-sm font-bold text-slate-600 mb-1"><span id="reward-progress-label">累積答對 0 / 5 題，獲得星星</span><span id="daily-progress-label">今日一輪：0 / 9 題</span></div>
+            <div class="h-3 rounded-full bg-slate-100 overflow-hidden border border-slate-200"><div id="reward-progress-bar" class="h-full rounded-full bg-gradient-to-r from-yellow-300 to-amber-500 transition-all duration-500" style="width:0%"></div></div>
+            <div id="daily-badge" class="hidden mt-3 text-center bg-gradient-to-r from-yellow-100 via-amber-50 to-pink-100 border-2 border-yellow-300 rounded-2xl px-4 py-3 font-black text-amber-800">🏅 今日英文小達人！今天完成一輪，明天再來收集新徽章！</div>
+        </div>
+    </section>
 
     <main class="w-full max-w-4xl flex-1 flex flex-col items-center justify-center mb-6">
 
@@ -164,6 +197,31 @@
             </div>
         </div>
 
+        <div id="section-fillblank" class="w-full hidden flex-col items-center">
+            <div class="w-full bg-white rounded-3xl shadow-2xl p-5 md:p-8 border-4 border-pink-300 text-center">
+                <h2 class="text-2xl md:text-3xl font-black text-pink-800 mb-2">🧩 英文填空挑戰</h2>
+                <p class="text-sm md:text-base text-slate-600 mb-5">看中文和卡通圖，把缺少的英文字母補回來！答錯可以再試，不扣分。</p>
+                <div class="bg-pink-50 border-2 border-pink-200 rounded-2xl p-5 md:p-7 max-w-md mx-auto mb-5">
+                    <div id="fillblank-image" class="mb-3"></div>
+                    <div id="fillblank-zh" class="text-2xl font-black text-slate-800 mb-3">頭髮</div>
+                    <div id="fillblank-pattern" class="text-4xl sm:text-5xl tracking-[0.18em] font-black text-indigo-700 mb-4" aria-label="英文單字填空">h _ _ r</div>
+                    <div class="flex justify-center items-center gap-2">
+                        <button type="button" onclick="speakFillBlankWord()" class="rounded-xl bg-amber-300 hover:bg-amber-400 px-4 py-2 font-bold shadow">🔊 聽單字</button>
+                        <button type="button" onclick="showFillBlankHint()" class="rounded-xl bg-sky-100 hover:bg-sky-200 text-sky-800 px-4 py-2 font-bold shadow">💡 提示</button>
+                    </div>
+                </div>
+                <form id="fillblank-form" class="max-w-md mx-auto" onsubmit="event.preventDefault(); checkFillBlankAnswer();">
+                    <label for="fillblank-input" class="block text-left text-sm font-bold text-slate-600 mb-2">輸入完整英文單字</label>
+                    <input id="fillblank-input" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" class="w-full text-center text-3xl font-black tracking-widest border-2 border-pink-200 focus:border-pink-500 rounded-2xl px-4 py-3 outline-none" placeholder="例如 hair" aria-label="填入完整英文單字">
+                    <div class="flex flex-wrap justify-center gap-3 mt-4">
+                        <button id="fillblank-check-btn" type="submit" class="bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-lg px-7 py-3 rounded-2xl shadow-lg">檢查答案 ✨</button>
+                        <button type="button" onclick="loadFillBlankQuestion()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold px-5 py-3 rounded-2xl shadow">換一題 🔄</button>
+                    </div>
+                </form>
+                <div id="fillblank-feedback" class="mt-4 text-lg font-bold min-h-[32px]" aria-live="polite"></div>
+            </div>
+        </div>
+
         <div id="section-handwriting" class="w-full hidden flex-col items-center">
             <div class="w-full bg-white rounded-3xl shadow-2xl p-5 md:p-8 border-4 border-emerald-300 text-center">
                 <h2 class="text-2xl md:text-3xl font-black text-emerald-800 mb-2">🖍️ 英文小小書法家</h2>
@@ -189,6 +247,16 @@
         </div>
 
     </main>
+
+    <div id="reward-modal" class="hidden fixed inset-0 z-50 bg-slate-900/50 items-center justify-center p-5" role="dialog" aria-modal="true" aria-labelledby="reward-modal-title">
+        <div class="reward-pop relative w-full max-w-sm bg-white rounded-[2rem] border-4 border-yellow-300 shadow-2xl p-7 text-center overflow-hidden">
+            <div class="floating-star text-3xl" style="left:15%;top:18%">⭐</div><div class="floating-star text-2xl" style="right:14%;top:22%;animation-delay:.2s">✨</div>
+            <div id="reward-modal-icon" class="text-7xl mb-3">⭐</div>
+            <h2 id="reward-modal-title" class="text-2xl font-black text-indigo-700 mb-2">太棒了！</h2>
+            <p id="reward-modal-message" class="text-lg font-bold text-slate-600 mb-5">你得到一顆星星！</p>
+            <button type="button" onclick="closeRewardModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-black text-lg px-8 py-3 rounded-2xl shadow-lg">繼續學習！</button>
+        </div>
+    </div>
 
     <footer class="w-full max-w-4xl text-center text-xs text-slate-500 py-4 border-t border-slate-300/60 font-medium">
         ✨ 專為國小一年級小朋友設計的英文聽說讀寫互動學習網 ✨
@@ -220,18 +288,84 @@
             { en: "nose",  zh: "鼻子",     imageKey: "nose",  hint: "n _ s e" }
         ];
 
-        let score = parseInt(localStorage.getItem('kid_score') || '0');
-        updateScoreDisplay();
-
+        // 獎勵進度會保存在這台裝置的瀏覽器；答錯不扣分，也不會失去已拿到的獎勵。
+        function localDateKey() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        }
+        function loadRewardState() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('kid_reward_state') || 'null');
+                if (saved && typeof saved.totalCorrect === 'number') return saved;
+            } catch (e) {}
+            return { totalCorrect: 0, stars: 0, dailyDate: localDateKey(), dailyCorrect: 0, dailyBadgeDate: '', chestUnlocked: false, decorationUnlocked: false, shownMilestones: [] };
+        }
+        let rewardState = loadRewardState();
+        if (rewardState.dailyDate !== localDateKey()) {
+            rewardState.dailyDate = localDateKey();
+            rewardState.dailyCorrect = 0;
+        }
+        rewardState.shownMilestones = Array.isArray(rewardState.shownMilestones) ? rewardState.shownMilestones : [];
+        let score = rewardState.stars || 0;
+        function saveRewardState() {
+            rewardState.stars = score;
+            try { localStorage.setItem('kid_reward_state', JSON.stringify(rewardState)); } catch (e) {}
+            localStorage.setItem('kid_score', String(score));
+        }
         function updateScoreDisplay() {
             document.getElementById('score-display').innerText = `${score} 星星`;
-            localStorage.setItem('kid_score', score);
+            document.getElementById('reward-star-count').innerText = `${score} 顆`;
+            const nextMilestone = (Math.floor(rewardState.totalCorrect / 5) + 1) * 5;
+            const progress = rewardState.totalCorrect % 5;
+            document.getElementById('reward-progress-label').innerText = `累積答對 ${rewardState.totalCorrect} 題｜再答對 ${5-progress || 5} 題獲得星星`;
+            document.getElementById('reward-progress-bar').style.width = `${progress / 5 * 100}%`;
+            document.getElementById('reward-summary').innerText = rewardState.totalCorrect < 5 ? '答對 5 題，就能獲得第一顆星星！' : `已累積答對 ${rewardState.totalCorrect} 題，繼續收集星星和禮物！`;
+            document.getElementById('reward-chest-icon').innerText = rewardState.chestUnlocked ? '🎁' : '🧰';
+            document.getElementById('reward-chest-label').innerText = rewardState.chestUnlocked ? '寶箱已打開！' : '10 題開寶箱';
+            document.getElementById('reward-decoration-icon').innerText = rewardState.decorationUnlocked ? '👑' : '🔒';
+            document.getElementById('reward-decoration-label').innerText = rewardState.decorationUnlocked ? '皇冠已解鎖！' : '15 題解鎖皇冠';
+            document.getElementById('reward-mascot').innerText = rewardState.decorationUnlocked ? '🧒👑' : '🧒';
+            document.getElementById('daily-progress-label').innerText = `今日一輪：${Math.min(rewardState.dailyCorrect,9)} / 9 題`;
+            document.getElementById('daily-badge').classList.toggle('hidden', rewardState.dailyBadgeDate !== localDateKey());
+            saveRewardState();
         }
-
-        function addScore(points) {
-            score += points;
+        function showReward(title, message, icon) {
+            document.getElementById('reward-modal-title').innerText = title;
+            document.getElementById('reward-modal-message').innerText = message;
+            document.getElementById('reward-modal-icon').innerText = icon;
+            const modal = document.getElementById('reward-modal');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            playChime(true);
+        }
+        function closeRewardModal() {
+            const modal = document.getElementById('reward-modal');
+            modal.classList.add('hidden'); modal.classList.remove('flex');
+        }
+        function recordCorrectAnswer() {
+            rewardState.totalCorrect += 1;
+            rewardState.dailyCorrect = (rewardState.dailyDate === localDateKey() ? rewardState.dailyCorrect : 0) + 1;
+            rewardState.dailyDate = localDateKey();
+            let rewardTitle = '', rewardMessage = '', rewardIcon = '';
+            if (rewardState.totalCorrect % 5 === 0) {
+                score += 1;
+                rewardTitle = '獲得一顆星星！'; rewardMessage = `太厲害了！你已累積答對 ${rewardState.totalCorrect} 題。`; rewardIcon = '⭐';
+            }
+            if (rewardState.totalCorrect >= 10 && !rewardState.chestUnlocked) {
+                rewardState.chestUnlocked = true;
+                rewardTitle = '寶箱打開了！'; rewardMessage = '你答對 10 題了！快看看寶箱裡的驚喜 🎁'; rewardIcon = '🎁';
+            }
+            if (rewardState.totalCorrect >= 15 && !rewardState.decorationUnlocked) {
+                rewardState.decorationUnlocked = true;
+                rewardTitle = '解鎖專屬皇冠！'; rewardMessage = '你答對 15 題了，角色戴上皇冠啦！'; rewardIcon = '👑';
+            }
+            if (rewardState.dailyCorrect >= 9 && rewardState.dailyBadgeDate !== localDateKey()) {
+                rewardState.dailyBadgeDate = localDateKey();
+                rewardTitle = '今日英文小達人！'; rewardMessage = '今天完成 9 題，拿到每日學習徽章！'; rewardIcon = '🏅';
+            }
             updateScoreDisplay();
+            if (rewardTitle) showReward(rewardTitle, rewardMessage, rewardIcon);
         }
+        updateScoreDisplay();
 
         // Web Audio API Synth Sound Effect (Guaranteed Audio Playback)
         let audioCtx = null;
@@ -498,6 +632,7 @@
             document.getElementById('section-learn').classList.add('hidden');
             document.getElementById('section-quiz').classList.add('hidden');
             document.getElementById('section-spelling').classList.add('hidden');
+            document.getElementById('section-fillblank').classList.add('hidden');
             document.getElementById('section-handwriting').classList.add('hidden');
 
             document.getElementById(`section-${tabName}`).classList.remove('hidden');
@@ -505,6 +640,9 @@
 
             if (tabName === 'spelling') {
                 loadSpellingQuestion();
+            }
+            if (tabName === 'fillblank') {
+                loadFillBlankQuestion();
             }
             if (tabName === 'handwriting') {
                 initHandwriting();
@@ -538,6 +676,7 @@
 
         // Teacher Quiz Mode
         let currentQuizItem = null;
+        let currentQuizAnswered = false;
 
         function startTeacherQuiz() {
             playChime(true);
@@ -547,6 +686,7 @@
         }
 
         function nextQuizQuestion() {
+            currentQuizAnswered = false;
             playChime(true);
             document.getElementById('quiz-feedback').innerHTML = '';
             document.getElementById('quiz-spelling-input').value = '';
@@ -615,11 +755,13 @@
                 return;
             }
 
+            if (currentQuizAnswered) return;
             if (userInputValue === currentQuizItem.en.toLowerCase()) {
+                currentQuizAnswered = true;
                 playChime(true);
                 feedbackEl.innerHTML = '<span class="text-emerald-600">🎉 太棒了！答對了！發音與拼字都完美！</span>';
                 speakWord('Great job! Correct!', 'en-US');
-                addScore(1);
+                recordCorrectAnswer();
                 document.getElementById('next-quiz-container').classList.remove('hidden');
             } else {
                 playChime(false);
@@ -630,6 +772,7 @@
 
         // Spelling Practice Mode: 10 lowercase letter tiles, including the answer letters plus distractors.
         let currentSpellingItem = null;
+        let spellingQuestionAnswered = false;
         let spellingLetterTiles = [];
         let selectedSpellingTileIds = [];
         let nextSpellingTileId = 1;
@@ -644,6 +787,7 @@
         }
 
         function loadSpellingQuestion() {
+            spellingQuestionAnswered = false;
             playChime(true);
             document.getElementById('spelling-feedback').innerHTML = '';
             selectedSpellingTileIds = [];
@@ -723,6 +867,7 @@
         }
 
         function checkSpelling() {
+            if (spellingQuestionAnswered) return;
             const userInput = selectedSpellingTileIds
                 .map(id => spellingLetterTiles.find(tile => tile.id === id)?.letter || '')
                 .join('');
@@ -740,15 +885,84 @@
             }
 
             if (userInput === currentSpellingItem.en.toLowerCase()) {
+                spellingQuestionAnswered = true;
                 playChime(true);
                 feedbackEl.innerHTML = '<span class="text-emerald-600">🌟 太厲害了！拼字完全正確！獲得 1 顆星星！</span>';
                 speakWord('Awesome!', 'en-US');
-                addScore(1);
+                recordCorrectAnswer();
                 document.querySelectorAll('#letter-tile-grid button, #spelling-answer-slots button').forEach(button => button.disabled = true);
                 setTimeout(loadSpellingQuestion, 2000);
             } else {
                 playChime(false);
                 feedbackEl.innerHTML = `<span class="text-rose-500">💡 再試一次！可以點上方已選的字母退回重選。</span>`;
+            }
+        }
+
+        // Fill-in-the-blank challenge. Correct answers count toward the shared reward system once per question.
+        let currentFillBlankItem = null;
+        let fillBlankAnswered = false;
+        let fillBlankHintLevel = 0;
+        const fillBlankPatterns = {
+            hair: ['h _ _ r', 'h _ i _'],
+            head: ['h _ _ d', '_ e a _'],
+            leg: ['l _ g', '_ e _'],
+            face: ['f _ c e', '_ a _ e'],
+            eye: ['e _ e', '_ y _'],
+            ear: ['e _ r', '_ a _'],
+            mouth: ['m _ u t h', '_ o _ t h'],
+            smile: ['s _ i l e', '_ m i _ e'],
+            nose: ['n _ s e', '_ o _ e']
+        };
+
+        function loadFillBlankQuestion() {
+            currentFillBlankItem = vocabularyData[Math.floor(Math.random() * vocabularyData.length)];
+            fillBlankAnswered = false;
+            fillBlankHintLevel = 0;
+            document.getElementById('fillblank-image').innerHTML = `<img src="${cartoonImages[currentFillBlankItem.imageKey]}" alt="${currentFillBlankItem.zh}卡通圖" class="mx-auto w-40 h-32 object-contain" loading="eager">`;
+            document.getElementById('fillblank-zh').innerText = currentFillBlankItem.zh;
+            document.getElementById('fillblank-pattern').innerText = (fillBlankPatterns[currentFillBlankItem.en] || [currentFillBlankItem.hint])[0].replace(/_/g, '_');
+            document.getElementById('fillblank-input').value = '';
+            document.getElementById('fillblank-input').disabled = false;
+            document.getElementById('fillblank-check-btn').disabled = false;
+            document.getElementById('fillblank-feedback').innerHTML = '';
+            document.getElementById('fillblank-input').focus({preventScroll:true});
+        }
+
+        function showFillBlankHint() {
+            if (!currentFillBlankItem || fillBlankAnswered) return;
+            const patterns = fillBlankPatterns[currentFillBlankItem.en] || [currentFillBlankItem.hint];
+            fillBlankHintLevel = (fillBlankHintLevel + 1) % patterns.length;
+            document.getElementById('fillblank-pattern').innerText = patterns[fillBlankHintLevel];
+            document.getElementById('fillblank-feedback').innerHTML = '<span class="text-sky-700">💡 看看已經出現的字母，再把完整單字寫出來！</span>';
+        }
+
+        function speakFillBlankWord() {
+            if (currentFillBlankItem) speakWord(currentFillBlankItem.en, 'en-US');
+        }
+
+        function checkFillBlankAnswer() {
+            if (!currentFillBlankItem || fillBlankAnswered) return;
+            const input = document.getElementById('fillblank-input');
+            const answer = input.value.trim().toLowerCase();
+            const feedback = document.getElementById('fillblank-feedback');
+            if (!answer) {
+                feedback.innerHTML = '<span class="text-amber-600">先試著填入英文單字喔！</span>';
+                playChime(false);
+                input.focus();
+                return;
+            }
+            if (answer === currentFillBlankItem.en.toLowerCase()) {
+                fillBlankAnswered = true;
+                input.disabled = true;
+                document.getElementById('fillblank-check-btn').disabled = true;
+                feedback.innerHTML = '<span class="text-emerald-600">🎉 答對了！好棒！獲得答題進度！</span>';
+                playChime(true);
+                recordCorrectAnswer();
+                speakWord(currentFillBlankItem.en, 'en-US');
+            } else {
+                feedback.innerHTML = '<span class="text-rose-500">🌱 再試一次！不扣分喔，可以按「提示」看看另一種填空。</span>';
+                playChime(false);
+                input.select();
             }
         }
 
