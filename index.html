@@ -50,16 +50,6 @@
         </div>
     </header>
 
-    <div class="w-full max-w-4xl mb-5 bg-white/90 rounded-2xl border-2 border-amber-200 shadow-md p-3">
-        <div class="flex items-center justify-between gap-3 mb-2">
-            <span class="font-extrabold text-indigo-700">🎯 集滿 5 題答對，就有驚喜！</span>
-            <span id="correct-progress-label" class="text-sm font-bold text-amber-700">0 / 5 題</span>
-        </div>
-        <div class="h-3 bg-amber-100 rounded-full overflow-hidden" role="progressbar" aria-label="距離下一次獎勵的進度" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0" id="correct-progress-bar">
-            <div id="correct-progress-fill" class="h-full rounded-full bg-gradient-to-r from-amber-400 to-pink-400 transition-all duration-500" style="width:0%"></div>
-        </div>
-    </div>
-
     <nav class="w-full max-w-4xl flex justify-center space-x-2 md:space-x-4 mb-6">
         <button onclick="switchTab('learn')" id="tab-learn" class="tab-btn px-5 py-3 rounded-2xl font-bold text-base md:text-lg transition-all duration-300 bg-indigo-600 text-white shadow-lg shadow-indigo-300 transform -translate-y-1">
             📚 單字學習卡
@@ -69,6 +59,9 @@
         </button>
         <button onclick="switchTab('spelling')" id="tab-spelling" class="tab-btn px-5 py-3 rounded-2xl font-bold text-base md:text-lg transition-all duration-300 bg-white text-indigo-600 hover:bg-indigo-50 shadow-md">
             ✍️ 拼字挑戰
+        </button>
+        <button onclick="switchTab('handwriting')" id="tab-handwriting" class="tab-btn px-4 py-3 rounded-2xl font-bold text-base md:text-lg transition-all duration-300 bg-white text-indigo-600 hover:bg-indigo-50 shadow-md">
+            🖍️ 手寫練習
         </button>
     </nav>
 
@@ -148,16 +141,8 @@
 
                 <div id="spelling-card" class="bg-indigo-50 border-2 border-indigo-200 rounded-2xl p-6 md:p-8 max-w-md mx-auto mb-5 shadow-inner">
                     <div id="spelling-emoji" class="mb-3"></div>
-                    <div class="flex items-center justify-center gap-3 mb-2">
-                        <div id="spelling-zh" class="text-3xl font-black text-slate-800">頭</div>
-                        <button type="button" onclick="playSpellingWord()" aria-label="播放英文發音" title="聽英文發音" class="w-12 h-12 rounded-full bg-sky-500 hover:bg-sky-600 text-white text-2xl shadow-lg active:scale-95 transition" style="touch-action: manipulation">🔊</button>
-                    </div>
-                    <div id="spelling-hint" class="text-sm font-bold text-indigo-500 mb-2">請依序選擇字母</div>
-                    <div id="spelling-pattern" class="text-2xl font-black tracking-widest text-violet-600 mb-3" aria-live="polite"></div>
-                    <div class="flex justify-center gap-2 mb-4">
-                        <button type="button" id="spelling-mode-full" onclick="setSpellingMode('full')" class="px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold shadow">完整拼寫</button>
-                        <button type="button" id="spelling-mode-fill" onclick="setSpellingMode('fill')" class="px-4 py-2 rounded-xl bg-white text-indigo-700 border-2 border-indigo-200 font-bold">填空練習</button>
-                    </div>
+                    <div id="spelling-zh" class="text-3xl font-black text-slate-800 mb-2">頭</div>
+                    <div id="spelling-hint" class="text-sm font-bold text-indigo-500 mb-4">請依順序選擇字母</div>
                     <div id="spelling-answer-slots" class="flex flex-wrap items-center justify-center gap-2 min-h-[58px]" aria-label="已選字母；點字母可退回"></div>
                     <p class="text-xs text-slate-500 mt-3">選錯了？點上方已選的字母就能退回。</p>
                 </div>
@@ -179,30 +164,35 @@
             </div>
         </div>
 
+        <div id="section-handwriting" class="w-full hidden flex-col items-center">
+            <div class="w-full bg-white rounded-3xl shadow-2xl p-5 md:p-8 border-4 border-emerald-300 text-center">
+                <h2 class="text-2xl md:text-3xl font-black text-emerald-800 mb-2">🖍️ 英文小小書法家</h2>
+                <p class="text-sm md:text-base text-slate-600 mb-4">用手指、觸控筆或滑鼠，沿著淡淡的字母描一描！</p>
+                <div class="bg-emerald-50 rounded-2xl border-2 border-emerald-100 p-4 mb-4">
+                    <div id="handwriting-zh" class="text-2xl md:text-3xl font-black text-slate-800 mb-1">頭</div>
+                    <div class="flex items-center justify-center gap-3">
+                        <span id="handwriting-word" class="text-3xl md:text-4xl font-black tracking-widest text-indigo-600">head</span>
+                        <button type="button" onclick="playHandwritingWord()" class="rounded-xl bg-amber-300 hover:bg-amber-400 px-4 py-2 text-lg font-bold shadow" aria-label="播放英文發音">🔊 聽發音</button>
+                    </div>
+                    <p id="handwriting-instruction" class="text-sm text-emerald-700 mt-2 font-bold">先看字母方向，再沿著灰色字體描寫</p>
+                </div>
+                <div class="relative w-full max-w-2xl mx-auto bg-white border-2 border-sky-200 rounded-2xl overflow-hidden shadow-inner">
+                    <canvas id="handwriting-canvas" class="block w-full touch-none" style="height:230px; touch-action:none; cursor:crosshair;" aria-label="英文手寫練習畫布"></canvas>
+                </div>
+                <div class="flex flex-wrap justify-center gap-2 mt-4">
+                    <button type="button" onclick="clearHandwriting()" class="bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-5 py-3 rounded-xl shadow">🧽 清除重寫</button>
+                    <button type="button" onclick="toggleHandwritingGuide()" id="handwriting-guide-btn" class="bg-sky-100 hover:bg-sky-200 text-sky-900 font-bold px-5 py-3 rounded-xl shadow">👀 隱藏描字</button>
+                    <button type="button" onclick="nextHandwritingWord()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold px-6 py-3 rounded-xl shadow">下一個單字 ➜</button>
+                </div>
+                <p class="mt-3 text-xs text-slate-500">小提醒：字母不必一次寫得完美，慢慢描寫、每天練一點就很棒！</p>
+            </div>
+        </div>
+
     </main>
 
     <footer class="w-full max-w-4xl text-center text-xs text-slate-500 py-4 border-t border-slate-300/60 font-medium">
         ✨ 專為國小一年級小朋友設計的英文聽說讀寫互動學習網 ✨
     </footer>
-
-    <div id="reward-overlay" class="hidden fixed inset-0 z-50 bg-indigo-950/60 backdrop-blur-sm items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="reward-title">
-        <div id="reward-card" class="relative w-full max-w-sm rounded-[2rem] border-4 border-yellow-300 bg-white p-7 text-center shadow-2xl">
-            <div class="text-6xl mb-3 reward-star">🌟🎉🌟</div>
-            <h2 id="reward-title" class="text-3xl font-black text-indigo-600 mb-2">太棒了！</h2>
-            <p id="reward-message" class="text-lg font-bold text-slate-700 mb-5">你已經答對 5 題！</p>
-            <div class="text-5xl mb-5">🏆</div>
-            <button type="button" onclick="closeReward()" class="w-full rounded-2xl bg-gradient-to-r from-pink-500 to-orange-400 px-6 py-3 text-xl font-extrabold text-white shadow-lg">繼續冒險！</button>
-            <button type="button" onclick="closeReward()" aria-label="關閉獎勵視窗" class="absolute right-3 top-2 rounded-full px-3 py-1 text-xl text-slate-400">×</button>
-        </div>
-    </div>
-
-    <style>
-        @keyframes rewardPop { 0% { transform: scale(.45) rotate(-8deg); opacity: 0; } 65% { transform: scale(1.08) rotate(3deg); opacity: 1; } 100% { transform: scale(1) rotate(0); opacity: 1; } }
-        @keyframes rewardFloat { 0%,100% { transform: translateY(0) rotate(-5deg); } 50% { transform: translateY(-12px) rotate(5deg); } }
-        #reward-card { animation: rewardPop .55s ease-out both; }
-        .reward-star { animation: rewardFloat 1.2s ease-in-out infinite; }
-        @media (prefers-reduced-motion: reduce) { #reward-card, .reward-star { animation: none !important; } }
-    </style>
 
     <script>
         const cartoonImages = {
@@ -230,51 +220,17 @@
             { en: "nose",  zh: "鼻子",     imageKey: "nose",  hint: "n _ s e" }
         ];
 
-        let score = parseInt(localStorage.getItem('kid_score') || '0', 10);
-        // Correct answers persist on this device. Progress cycles from 0 to 5; mistakes never remove progress.
-        let correctCount = parseInt(localStorage.getItem('kid_correct_count') || '0', 10);
+        let score = parseInt(localStorage.getItem('kid_score') || '0');
         updateScoreDisplay();
-        updateCorrectProgress();
 
         function updateScoreDisplay() {
             document.getElementById('score-display').innerText = `${score} 星星`;
             localStorage.setItem('kid_score', score);
         }
 
-        function updateCorrectProgress() {
-            const progress = correctCount % 5;
-            const label = document.getElementById('correct-progress-label');
-            const fill = document.getElementById('correct-progress-fill');
-            const bar = document.getElementById('correct-progress-bar');
-            if (label) label.textContent = `${progress} / 5 題`;
-            if (fill) fill.style.width = `${progress * 20}%`;
-            if (bar) bar.setAttribute('aria-valuenow', String(progress));
-        }
-
         function addScore(points) {
             score += points;
             updateScoreDisplay();
-            // Every five genuinely completed correct answers triggers a short celebration.
-            correctCount += 1;
-            localStorage.setItem('kid_correct_count', String(correctCount));
-            updateCorrectProgress();
-            if (correctCount % 5 === 0) showReward();
-        }
-
-        function showReward() {
-            const overlay = document.getElementById('reward-overlay');
-            const message = document.getElementById('reward-message');
-            if (message) message.textContent = `你已經答對 ${correctCount} 題！獲得一個魔法獎盃，繼續加油！`;
-            if (overlay) {
-                overlay.classList.remove('hidden');
-                overlay.classList.add('flex');
-            }
-            // No extra sound effect: keep the reward visual and avoid overlapping the word audio.
-        }
-
-        function closeReward() {
-            const overlay = document.getElementById('reward-overlay');
-            if (overlay) { overlay.classList.add('hidden'); overlay.classList.remove('flex'); }
         }
 
         // Web Audio API Synth Sound Effect (Guaranteed Audio Playback)
@@ -542,12 +498,16 @@
             document.getElementById('section-learn').classList.add('hidden');
             document.getElementById('section-quiz').classList.add('hidden');
             document.getElementById('section-spelling').classList.add('hidden');
+            document.getElementById('section-handwriting').classList.add('hidden');
 
             document.getElementById(`section-${tabName}`).classList.remove('hidden');
             document.getElementById(`section-${tabName}`).classList.add('flex');
 
             if (tabName === 'spelling') {
                 loadSpellingQuestion();
+            }
+            if (tabName === 'handwriting') {
+                initHandwriting();
             }
         }
 
@@ -578,7 +538,6 @@
 
         // Teacher Quiz Mode
         let currentQuizItem = null;
-        let currentQuizAnswered = false;
 
         function startTeacherQuiz() {
             playChime(true);
@@ -596,8 +555,6 @@
 
             const randomIndex = Math.floor(Math.random() * vocabularyData.length);
             currentQuizItem = vocabularyData[randomIndex];
-            currentQuizAnswered = false;
-            document.getElementById('quiz-spelling-input').disabled = false;
 
             document.getElementById('teacher-prompt-zh').innerText = currentQuizItem.zh;
             speakTeacherQuestion();
@@ -649,7 +606,6 @@
         }
 
         function checkQuizAnswer() {
-            if (currentQuizAnswered) return;
             const userInputValue = document.getElementById('quiz-spelling-input').value.trim().toLowerCase();
             const feedbackEl = document.getElementById('quiz-feedback');
 
@@ -663,8 +619,6 @@
                 playChime(true);
                 feedbackEl.innerHTML = '<span class="text-emerald-600">🎉 太棒了！答對了！發音與拼字都完美！</span>';
                 speakWord('Great job! Correct!', 'en-US');
-                currentQuizAnswered = true;
-                document.getElementById('quiz-spelling-input').disabled = true;
                 addScore(1);
                 document.getElementById('next-quiz-container').classList.remove('hidden');
             } else {
@@ -676,42 +630,9 @@
 
         // Spelling Practice Mode: 10 lowercase letter tiles, including the answer letters plus distractors.
         let currentSpellingItem = null;
-        let currentSpellingAnswered = false;
         let spellingLetterTiles = [];
         let selectedSpellingTileIds = [];
         let nextSpellingTileId = 1;
-        let spellingMode = 'full';
-
-        function setSpellingMode(mode) {
-            spellingMode = mode === 'fill' ? 'fill' : 'full';
-            const fullBtn = document.getElementById('spelling-mode-full');
-            const fillBtn = document.getElementById('spelling-mode-fill');
-            fullBtn.className = spellingMode === 'full' ? 'px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold shadow' : 'px-4 py-2 rounded-xl bg-white text-indigo-700 border-2 border-indigo-200 font-bold';
-            fillBtn.className = spellingMode === 'fill' ? 'px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold shadow' : 'px-4 py-2 rounded-xl bg-white text-indigo-700 border-2 border-indigo-200 font-bold';
-            if (currentSpellingItem) {
-                selectedSpellingTileIds = [];
-                currentSpellingAnswered = false;
-                document.getElementById('spelling-feedback').innerHTML = '';
-                updateSpellingHint();
-                renderSpellingTiles();
-            }
-        }
-
-        function playSpellingWord() {
-            if (currentSpellingItem) speakWord(currentSpellingItem.en, 'en-US');
-        }
-
-        function updateSpellingHint() {
-            if (!currentSpellingItem) return;
-            const word = currentSpellingItem.en.toLowerCase();
-            document.getElementById('spelling-hint').innerText = spellingMode === 'fill'
-                ? '聽發音，再補上缺少的字母！'
-                : `請依序選出 ${word.length} 個小寫字母（共 10 張字母卡）`;
-            const pattern = spellingMode === 'fill'
-                ? word.split('').map((ch, i) => (i === 0 || i === word.length - 1) ? ch : '_').join(' ')
-                : '看圖拼出英文單字';
-            document.getElementById('spelling-pattern').innerText = pattern;
-        }
 
         function shuffleArray(items) {
             const arr = items.slice();
@@ -724,16 +645,14 @@
 
         function loadSpellingQuestion() {
             playChime(true);
-            document.querySelector('#section-spelling button[onclick="loadSpellingQuestion()"]')?.classList.remove('ring-4', 'ring-amber-300');
             document.getElementById('spelling-feedback').innerHTML = '';
             selectedSpellingTileIds = [];
 
             const randomIndex = Math.floor(Math.random() * vocabularyData.length);
             currentSpellingItem = vocabularyData[randomIndex];
-            currentSpellingAnswered = false;
             document.getElementById('spelling-emoji').innerHTML = `<img src="${cartoonImages[currentSpellingItem.imageKey]}" alt="${currentSpellingItem.zh}卡通圖" class="mx-auto w-44 h-36 object-contain rounded-2xl" loading="eager">`;
             document.getElementById('spelling-zh').innerText = currentSpellingItem.zh;
-            updateSpellingHint();
+            document.getElementById('spelling-hint').innerText = `請依序選出 ${currentSpellingItem.en.length} 個小寫字母（共 10 張字母卡）`;
 
             const letters = currentSpellingItem.en.split('').map(letter => ({ id: nextSpellingTileId++, letter }));
             const alphabet = 'abcdefghijklmnopqrstuvwxyz';
@@ -804,7 +723,6 @@
         }
 
         function checkSpelling() {
-            if (currentSpellingAnswered) return;
             const userInput = selectedSpellingTileIds
                 .map(id => spellingLetterTiles.find(tile => tile.id === id)?.letter || '')
                 .join('');
@@ -825,16 +743,155 @@
                 playChime(true);
                 feedbackEl.innerHTML = '<span class="text-emerald-600">🌟 太厲害了！拼字完全正確！獲得 1 顆星星！</span>';
                 speakWord('Awesome!', 'en-US');
-                currentSpellingAnswered = true;
                 addScore(1);
                 document.querySelectorAll('#letter-tile-grid button, #spelling-answer-slots button').forEach(button => button.disabled = true);
-                // Let the child enjoy the success message; tap「換一題」when ready.
-                document.querySelector('#section-spelling button[onclick="loadSpellingQuestion()"]')?.classList.add('ring-4', 'ring-amber-300');
+                setTimeout(loadSpellingQuestion, 2000);
             } else {
                 playChime(false);
                 feedbackEl.innerHTML = `<span class="text-rose-500">💡 再試一次！可以點上方已選的字母退回重選。</span>`;
             }
         }
+
+        // Handwriting practice: finger/stylus/mouse drawing with a light tracing guide.
+        let handwritingIndex = 0;
+        let handwritingGuideVisible = true;
+        let handwritingStrokes = [];
+        let handwritingCurrentStroke = null;
+        let handwritingCanvasReady = false;
+
+        function initHandwriting() {
+            const canvas = document.getElementById('handwriting-canvas');
+            if (!canvas) return;
+            if (!handwritingCanvasReady) {
+                canvas.addEventListener('pointerdown', handwritingPointerDown);
+                canvas.addEventListener('pointermove', handwritingPointerMove);
+                canvas.addEventListener('pointerup', handwritingPointerUp);
+                canvas.addEventListener('pointercancel', handwritingPointerUp);
+                canvas.addEventListener('pointerleave', handwritingPointerUp);
+                handwritingCanvasReady = true;
+            }
+            drawHandwritingCanvas();
+        }
+
+        function currentHandwritingItem() {
+            return vocabularyData[handwritingIndex % vocabularyData.length];
+        }
+
+        function nextHandwritingWord() {
+            handwritingIndex = (handwritingIndex + 1) % vocabularyData.length;
+            handwritingStrokes = [];
+            const item = currentHandwritingItem();
+            document.getElementById('handwriting-zh').textContent = item.zh;
+            document.getElementById('handwriting-word').textContent = item.en.toLowerCase();
+            document.getElementById('handwriting-instruction').textContent = `描寫小寫單字：${item.en.toLowerCase()}`;
+            drawHandwritingCanvas();
+        }
+
+        function playHandwritingWord() {
+            const item = currentHandwritingItem();
+            speakWord(item.en.toLowerCase(), 'en-US');
+        }
+
+        function clearHandwriting() {
+            handwritingStrokes = [];
+            drawHandwritingCanvas();
+        }
+
+        function toggleHandwritingGuide() {
+            handwritingGuideVisible = !handwritingGuideVisible;
+            document.getElementById('handwriting-guide-btn').textContent = handwritingGuideVisible ? '👀 隱藏描字' : '👀 顯示描字';
+            drawHandwritingCanvas();
+        }
+
+        function handwritingPointerDown(event) {
+            const canvas = document.getElementById('handwriting-canvas');
+            event.preventDefault();
+            canvas.setPointerCapture?.(event.pointerId);
+            const point = handwritingPoint(event, canvas);
+            handwritingCurrentStroke = { points: [point] };
+            handwritingStrokes.push(handwritingCurrentStroke);
+            drawHandwritingCanvas();
+        }
+
+        function handwritingPointerMove(event) {
+            if (!handwritingCurrentStroke) return;
+            event.preventDefault();
+            const canvas = document.getElementById('handwriting-canvas');
+            handwritingCurrentStroke.points.push(handwritingPoint(event, canvas));
+            drawHandwritingCanvas();
+        }
+
+        function handwritingPointerUp() {
+            handwritingCurrentStroke = null;
+        }
+
+        function handwritingPoint(event, canvas) {
+            const rect = canvas.getBoundingClientRect();
+            return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+        }
+
+        function drawHandwritingCanvas() {
+            const canvas = document.getElementById('handwriting-canvas');
+            if (!canvas) return;
+            const rect = canvas.getBoundingClientRect();
+            const width = Math.max(280, Math.floor(rect.width || canvas.parentElement.clientWidth || 600));
+            const height = 230;
+            const dpr = Math.max(1, window.devicePixelRatio || 1);
+            if (canvas.width !== Math.floor(width * dpr) || canvas.height !== Math.floor(height * dpr)) {
+                canvas.width = Math.floor(width * dpr);
+                canvas.height = Math.floor(height * dpr);
+            }
+            canvas.style.height = `${height}px`;
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, width, height);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, height);
+
+            // Primary writing line and light guide lines for first graders.
+            ctx.strokeStyle = '#bfdbfe';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([6, 6]);
+            [45, 115, 185].forEach(y => { ctx.beginPath(); ctx.moveTo(12, y); ctx.lineTo(width - 12, y); ctx.stroke(); });
+            ctx.setLineDash([]);
+            ctx.strokeStyle = '#93c5fd';
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(12, 185); ctx.lineTo(width - 12, 185); ctx.stroke();
+
+            if (handwritingGuideVisible) {
+                const word = currentHandwritingItem().en.toLowerCase();
+                const fontSize = Math.min(90, Math.max(42, (width - 36) / (word.length * 0.62)));
+                ctx.font = `700 ${fontSize}px Fredoka, Arial, sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#d1d5db';
+                ctx.fillText(word, width / 2, 118, width - 36);
+                // A light green start dot helps children know where to begin.
+                ctx.beginPath(); ctx.arc(Math.max(18, width/2 - Math.min(width*0.34, word.length*fontSize*0.25)), 118, 5, 0, Math.PI*2);
+                ctx.fillStyle = '#86efac'; ctx.fill();
+            }
+
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.strokeStyle = '#4f46e5';
+            ctx.lineWidth = 5;
+            handwritingStrokes.forEach(stroke => {
+                const points = stroke.points;
+                if (!points || !points.length) return;
+                ctx.beginPath();
+                ctx.moveTo(points[0].x, points[0].y);
+                if (points.length === 1) {
+                    ctx.lineTo(points[0].x + 0.1, points[0].y + 0.1);
+                } else {
+                    for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+                }
+                ctx.stroke();
+            });
+        }
+
+        window.addEventListener('resize', () => {
+            if (document.getElementById('section-handwriting') && !document.getElementById('section-handwriting').classList.contains('hidden')) drawHandwritingCanvas();
+        });
     </script>
 
 </body>
