@@ -175,7 +175,10 @@
                 <div id="spelling-card" class="bg-indigo-50 border-2 border-indigo-200 rounded-2xl p-6 md:p-8 max-w-md mx-auto mb-5 shadow-inner">
                     <div id="spelling-emoji" class="mb-3"></div>
                     <div id="spelling-zh" class="text-3xl font-black text-slate-800 mb-2">頭</div>
-                    <div id="spelling-hint" class="text-sm font-bold text-indigo-500 mb-4">請依順序選擇字母</div>
+                    <div id="spelling-hint" class="text-sm font-bold text-indigo-500 mb-3">請依順序選擇字母</div>
+                    <div class="mb-4">
+                        <button type="button" onclick="speakSpellingWord()" class="rounded-xl bg-amber-300 hover:bg-amber-400 active:scale-95 px-4 py-2 font-bold shadow transition-all" aria-label="播放目前單字英文發音">🔊 聽單字</button>
+                    </div>
                     <div id="spelling-answer-slots" class="flex flex-wrap items-center justify-center gap-2 min-h-[58px]" aria-label="已選字母；點字母可退回"></div>
                     <p class="text-xs text-slate-500 mt-3">選錯了？點上方已選的字母就能退回。</p>
                 </div>
@@ -813,6 +816,11 @@
             }
             spellingLetterTiles = shuffleArray([...letters, ...distractors]);
             renderSpellingTiles();
+        }
+
+        // 與填空挑戰相同：播放目前題目的英文單字音檔，必要時由 speakWord 使用語音備援。
+        function speakSpellingWord() {
+            if (currentSpellingItem) speakWord(currentSpellingItem.en, 'en-US');
         }
 
         function renderSpellingTiles() {
