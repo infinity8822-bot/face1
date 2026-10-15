@@ -423,7 +423,7 @@
         const embeddedEnglishAudio = {
             head: 'audio/head.mp3',
             hair: 'audio/hair.mp3',
-            leg: null, // leg.mp3 上傳檔案為空，暫時使用瀏覽器英文語音
+            leg: 'audio/leg.mp3',
             face: 'audio/face.mp3',
             eye: 'audio/eye.mp3',
             ear: 'audio/ear.mp3',
@@ -438,8 +438,8 @@
             const attemptId = ++speechAttemptId;
             stopCurrentSpeech();
 
-            // For the nine vocabulary cards, play an audio file embedded in this HTML.
-            // Audio.play() is called immediately in the user's tap handler for iPad Safari.
+            // For the nine vocabulary cards, play the matching Speechify MP3 from the audio folder.
+            // Keep the audio path relative so GitHub Pages and iPad Safari can load it.
             if (!(lang || '').toLowerCase().startsWith('zh') && embeddedEnglishAudio[wordKey]) {
                 const audio = new Audio(embeddedEnglishAudio[wordKey]);
                 audio.preload = 'auto';
